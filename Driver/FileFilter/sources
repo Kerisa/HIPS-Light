@@ -1,0 +1,11 @@
+TARGETNAME=Myminifilter
+TARGETTYPE=DRIVER
+DRIVERTYPE=FS
+
+
+TARGETLIBS= $(TARGETLIBS) \
+            $(IFSKIT_LIB_PATH)\fltMgr.lib
+
+SOURCES=Myminifilter.c \
+        Myminifilter.rc \
+        Base.c

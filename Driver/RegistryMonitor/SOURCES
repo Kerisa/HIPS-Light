@@ -1,0 +1,8 @@
+TARGETNAME=RegMon
+TARGETTYPE=DRIVER
+TARGETPATH=OBJ
+
+INCLUDES=$(BASEDIR)\inc; \
+		 $(BASEDIR)\inc\ddk;
+
+SOURCES=RegisterMonitor.cpp
