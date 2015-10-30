@@ -401,13 +401,106 @@ bool RULES::DeleteRegRule(const wchar_t *target)
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+
+int my_wcsncmp(const wchar_t *src, const wchar_t *pat, long count)
+{
+	if (!count) return 0;
+
+	while (--count && *src && (*src == *pat || *pat == L'?'))
+		++src, ++pat;
+
+	return (int)(*src - *pat);
+}
+
+
+int my_wcscmp(const wchar_t *src, const wchar_t *pat)
+{
+	int ret = 0;
+
+	while (!((ret = (int)(*src - *pat)) && (ret = (int)(*pat - L'?'))) && *pat)
+		++src, ++pat;
+
+	return ret;
+}
+
+
+int SubMatch(const wchar_t *src, const wchar_t *sub, int srclen, int *pbegin)
+{
+	int i, ret = 0;
+	int begin = *pbegin;
+	int sublen = wcslen(sub);
+
+	for (i=begin; i<=srclen-sublen; ++i)
+		if (!my_wcsncmp(&src[i], sub, sublen))
+		{
+			*pbegin = i + sublen;
+			ret = 1;
+			break;
+		}
+
+	return ret;
+}
+
+
+int Match(const wchar_t *src, const wchar_t *_pat)
+{
+	int subPos[8] = {0};		// 限定分成8段
+	int wildcard = 0, begin = 0, subNow = 0;
+	unsigned long patlen = wcslen(_pat);
+	unsigned long i, subCnt = 0, last = 0;
+	wchar_t pat[MAXPATH];
+
+
+	if (!src || !_pat) return 0;
+	if (_pat[0] == L'*' && _pat[1] == 0) return 1;
+
+	wcscpy_s(pat, MAXPATH, _pat);
+
+
+	if (pat[0] == L'*')
+	{
+		last = i = 1;
+		wildcard = 1;
+	}
+	else
+		last = i = 0;
+
+	for (last=i; i<patlen; ++i)
+		if (pat[i] == L'*' && subCnt<7)
+		{
+			wildcard = 1;
+			subPos[subCnt++] = last;
+			pat[i] = 0;
+			last = i + 1;
+		}
+
+	if (last < patlen) subPos[subCnt++] = last; // 最后一段
+
+	if (!wildcard)
+		return !my_wcscmp(src, _pat);
+
+	for (i=0; i<subCnt; ++i)
+		if (!SubMatch(src, &pat[subPos[i]], wcslen(src), &begin))
+			return 0;
+
+	return 1;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 bool RULES::IsContainProc(const wchar_t *launcher, const wchar_t *target, int *pblock)
 {
 	for (int i=0; i<m_SizePi; ++i)
-		if (!wcscmp(launcher, m_arrPi[i].Launcher))
+		if (Match(launcher, m_arrPi[i].Launcher))
+		//if (!wcscmp(launcher, m_arrPi[i].Launcher))
 		{
 			for (PLIST p=m_arrPi[i].Header.next; p; p=p->next)
-				if (!wcscmp(target, p->Target))
+				if (Match(target, p->Target))
+				//if (!wcscmp(target, p->Target))
 				{
 					if (pblock)
 						*pblock = p->Block;

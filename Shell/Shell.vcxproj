@@ -74,6 +74,7 @@
     <ClCompile Include="hash.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="match.cpp" />
     <ClCompile Include="Proc.cpp" />
     <ClCompile Include="ProcessInfo.cpp" />
     <ClCompile Include="Reg.cpp" />
