@@ -496,11 +496,9 @@ bool RULES::IsContainProc(const wchar_t *launcher, const wchar_t *target, int *p
 {
 	for (int i=0; i<m_SizePi; ++i)
 		if (Match(launcher, m_arrPi[i].Launcher))
-		//if (!wcscmp(launcher, m_arrPi[i].Launcher))
 		{
 			for (PLIST p=m_arrPi[i].Header.next; p; p=p->next)
 				if (Match(target, p->Target))
-				//if (!wcscmp(target, p->Target))
 				{
 					if (pblock)
 						*pblock = p->Block;
